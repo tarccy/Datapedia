@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>DataPedia</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="jquery.js"></script>
+    <script>
+        $(document).ready(function () {
+            let length = 0;
+            let repository_name = []; // 页面上的仓库名
+            let repository_datatype = []; // 各仓库的数据类型
+            $(".backtomenu_button").hide()
+            $(".logout_button").hide()
+
+            $(".repository_name_input_table").hide();
+            $(".table_items_table").hide();
+
+            function GetQueryString(name, url) {
+                url = url || window.location.search.substr(1);
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = url.match(reg);
+                if (r != null) return decodeURI(r[2]);
+                return null;
+            }
+            var user_id = GetQueryString("user_id", "");
+            var now_user = localStorage.getItem("now_user");
+            $(".repository_table_head").append(user_id + "的个人数据仓库");
+            $(".cur_user").append(now_user)
+
+
+            $.ajax({
+                type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: "repositories@" + user_id, success: function (res) {
+                    repository_name = res.split(",");
+                    length = repository_name.length;
+                }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    debugger
+                    // 状态码
+                    console.log(XMLHttpRequest.status);
+                    // 状态
+                    console.log(XMLHttpRequest.readyState);
+                    // 错误信息
+                    console.log(textStatus);
+                    __hideLoading();
+
+                    if (XMLHttpRequest.readyState == 0) {
+                        // 对应登录超时问题，直接跳到登录页面
+                        location.href = '../Login.action';
+                    } else {
+                        $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                    }
+                }
+            })
+
+            for (let i = 1; i < length; i++) {
+                var txt = "<tr><td><div class=\"repository_div\" id=\"" + repository_name[i] + "\"> ";
+                txt += repository_name[i] + "</div></td></tr>";
+                $(".repository_table").append(txt);
+            }
+
+            $(document).on("click", ".repository_div", function () {
+                var url = "data_repository.html";
+                url += "?user_id=" + user_id + "&repository_id=" + this.id;
+                window.location.href = url;
+            });
+
+            let datatype_to_create = -1;
+            $(".create_picture_repository_button").click(function () {
+                $(".operation_buttons").hide();
+                $(".repository_name_input_table").show();
+                datatype_to_create = 0;
+            });
+
+            $(".create_text_repository_button").click(function () {
+                $(".operation_buttons").hide();
+                $(".repository_name_input_table").show();
+                datatype_to_create = 1;
+            });
+
+            $(".create_table_repository_button").click(function () {
+                $(".operation_buttons").hide();
+                $(".table_items_table").show();
+                $(".repository_name_input_table").show();
+                datatype_to_create = 2;
+            });
+
+            $(".create_button").click(function () {
+                let repository_name_to_create = $(".repository_name_input").val();
+                let txt = "create@" + String(datatype_to_create) + "@" + now_user + "@" + repository_name_to_create;
+                if (datatype_to_create == 2) {
+                    let tmp_txt = $(".table_items_input").val();
+                    txt += "@" + tmp_txt;
+                }
+                $.ajax({
+                    type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text/html;charset=utf-8", data: txt, success: function (res) {
+                        //alert(paras);
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                $.ajax({
+                    type: 'post', url: "http://pkudatagit.ml/create_repo", async: false, dataType: "text", data: {'repo_name': now_user+"@"+repository_name_to_create }, success: function (res) {
+                        repository_name = res.split(",");
+                        length = repository_name.length;
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                location.reload();
+            })
+
+            $(".search_button").click(function () {
+                url = "search.html";
+                window.location.href = url;
+            })
+
+            $(".cancel_create_button").click(function () {
+                location.reload();
+            })
+
+            var currentPage = 1;
+            var pageSize = 10;
+            var total = length - 1; // 数据条数
+            var total_size = 1; // 页面数
+
+            function page_change() {
+                var pages = [];
+                pages.push(currentPage);
+                total_size = Math.ceil(total / pageSize);
+                for (var i = 1; i < 5; i++) {
+                    var a = currentPage + i;
+                    var b = currentPage - i;
+                    if (pages.length < 5) {
+                        if (a <= total_size) pages.push(a);
+                        if (b > 0) pages.push(b);
+                    }
+                }
+                pages.sort(function compare(val1, val2) { return val1 - val2; });
+
+
+
+                $(".page-show").empty();
+                var content = "";
+                for (var i = 0; i < pages.length; i++) {
+                    if (pages[i] == currentPage) {
+                        content += "<button class=\"pageNumber_now\" data='" + pages[i] + "'>" + pages[i] + "</button>";
+                    } else {
+                        content += "<button class=\"pageNumber\" data='" + pages[i] + "'>" + pages[i] + "</button>";
+                    }
+                }
+                $(".page-show").append(content);
+
+
+                var l = pageSize * (currentPage - 1) + 1, r = Math.min(pageSize * currentPage, length - 1);
+                var txt = "view_repositories@" + user_id + "@" + String(l) + "@" + String(r);
+
+                $.ajax({
+                    type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: txt, success: function (res) {
+                        repository_name = res.split(",");
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+
+                $(".repository_table").empty();
+                $(".repository_table").append("<tr\><th\>仓库名</th\></tr\>");
+
+                var len = repository_name.length;
+                for (let i = 1; i < len; i++) {
+                    var txt = "<tr><td><div class=\"repository_div ";
+                    if ((i - 1) % 2 == 0) {
+                        txt += "even_row";
+                    }
+                    else txt += "odd_row";
+                    txt += "\" id=\"" + repository_name[i] + "\"> ";
+                    txt += repository_name[i] + "</div></td></tr>";
+                    $(".repository_table").append(txt);
+                }
+            }
+
+            $(".page_turn_button").click(function () {
+                var page_num = parseInt($(".page_turn_input").val());
+                if (page_num >= 1 && page_num <= total_size) {
+                    currentPage = page_num;
+                    page_change();
+                }
+                else {
+                    alert("不存在此页面！")
+                }
+            })
+
+            $(document).on("click", ".pageNumber", function () {
+                var page_num = parseInt($(this).attr("data"));
+                currentPage = page_num;
+                page_change();
+            });
+
+
+            $(".pageSizeSelect").change(function () {
+                pageSize = parseInt($(this).find("option:selected").val());
+                currentPage = 1;
+                page_change();
+            })
+
+            $(".page-first").click(function () {
+                if (currentPage != 1) {
+                    currentPage = 1;
+                    page_change();
+                }
+            })
+
+            $(".page-pre").click(function () {
+                if (currentPage != 1) {
+                    currentPage = currentPage - 1;
+                    page_change();
+                }
+            })
+
+            $(".page-next").click(function () {
+                if (currentPage != total_size) {
+                    currentPage = currentPage + 1;
+                    page_change();
+                }
+            })
+
+            $(".page-last").click(function () {
+                if (currentPage != total_size) {
+                    currentPage = total_size;
+                    page_change();
+                }
+            })
+
+
+            $(".page-count").text("共" + total + "个数据仓库");
+            if (total > 0) {
+                page_change()
+            };
+
+            $(".cur_user").click(function () {
+                $(".backtomenu_button").fadeToggle(300);
+                $(".logout_button").fadeToggle(300);
+            });
+
+
+            $(".backtomenu_button").click(function () {
+                var url = "datapedia.html?user_id=" + now_user;
+                window.location.href = url;
+            });
+
+            $(".cloze").click(function() {
+                var ifin=($(this).css("transform")!="none");
+                if (ifin)
+                {
+                    $(this).next().fadeOut(500);
+                    $(this).css("transform","none");
+                }
+                else
+                {
+                    $(this).next().fadeIn(500);
+                    $(this).css("transform","rotate(180deg)");
+                }
+                $(this).css("display","block");
+            });
+
+            $(".logout_button").click(function () {
+                var txt = "logout" + "@" + now_user;
+                $.ajax({
+                    type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: txt, success: function (res) {
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                localStorage.removeItem('now_user');
+
+
+                var url = "search.html";
+                window.location.href = url;
+            })
+        });
+    </script>
+</head>
+
+<body>
+    <h1 class="repository_table_head">
+    </h1>
+    <table class="repository_table" border="solid" text-align="center">
+        <tr>
+            <th>仓库名</th>
+        </tr>
+    </table>
+
+    <center>
+        <div class="page-box" style="margin-top: 10px;font-size: 14px">
+            <span class="page-limits">
+                <select lay-ignore="" style="height: 25px" class="pageSizeSelect">
+                    <option value="10" selected>10 条/页</option>
+                    <option value="20">20 条/页</option>
+                    <option value="30">30 条/页</option>
+                    <option value="40">40 条/页</option>
+                    <option value="50">50 条/页</option>
+                </select>
+            </span>
+
+            <button class="page-first">首页</button>
+            <button class="page-pre">上一页</button>
+            <span class="page-show"></span>
+            <button class="page-next">下一页</button>
+            <button class="page-last">末页</button>
+            <button class="page_turn_button">跳转</button>到<input class="page_turn_input" type="number" min="1"
+                style="width: 30px;">页
+
+            <span class="page-count"></span>
+        </div>
+    </center>
+
+    <div class="operation_buttons">
+        <button class="cloze"></button>
+        <div class="operation_buttons">
+            <button class="create_picture_repository_button"></button>
+            <button class="create_text_repository_button"></button>
+            <button class="create_table_repository_button"></button>
+            <button class="search_button"></button>
+        </div>
+    </div>
+
+    <div class="create_buttons">
+    <table class="table_items_table">
+        <tr>
+            <td>请输入表项名称，用“@”隔开，如“张三@李四@王五”</td>
+        </tr>
+        <tr>
+            <td><input class="table_items_input" placeholder="请在此输入表项名称，格式如上所述" style="text-align:center;" size="80">
+            </td>
+        </tr>
+    </table>
+
+    <table class="repository_name_input_table">
+        <tr>
+            <td>请输入仓库名：</td>
+            <td><input class="repository_name_input" placeholder="请在此输入仓库名" style="text-align:center;"></td>
+        </tr>
+        <tr>
+            <td><button class="create_button"></button></td>
+            <td><button class="cancel_create_button"></button></td>
+        </tr>
+    </table>
+    </div>
+    <div class="reserve_space">
+    </div>
+    <ul class="personal_info">
+        <li class="cur_user">你好,</li>
+        <li><button class="backtomenu_button">主页</button></li>
+        <li><button class="logout_button">登出</button></li>
+    </ul>
+
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        form {
+            width: 100%;
+            height: 100%;
+            margin-top: 100px;
+            margin-bottom: 100px;
+        }
+
+        div {
+            display: inline-block;
+            padding-top: 50px;
+            padding-bottom: 55px;
+            padding-left: 1px;
+            padding-right: 1px;
+        }
+
+        h2 {
+            font-family: "微软雅黑";
+            font-size: 40px;
+            color: black;
+        }
+
+        #log {
+            color: blue;
+        }
+    </style>
+
+    <script src="jquery.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".register_button").click(function () {
+                let username = $(".username").val();
+                let password = $(".password").val();
+                let confirm_password = $(".confirm_password").val();
+                if (username == '') {
+                    alert('用户名不可为空！');
+                    return;
+                }
+                else if (username.indexOf("@") > -1) {
+                    alert('用户名不可包含"@"！');
+                    return;
+                }
+                else if (username.indexOf(",") > -1) {
+                    alert('用户名不可包含","！');
+                    return;
+                }
+                else if (password == '') {
+                    alert('初始密码不可为空！');
+                    return;
+                }
+                else if (password.indexOf("@") > -1) {
+                    alert('密码不可包含"@"！');
+                    return;
+                }
+                else if (password.indexOf(",") > -1) {
+                    alert('密码不可包含","！');
+                    return;
+                }
+                else if (password != confirm_password) {
+                    alert('确认密码需要与输入的初始密码相同！');
+                    return;
+                }
+
+                let txt = "register@" + username + "@" + password;
+
+                paras = [];
+                $.ajax({
+                    type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: txt, success: function (res) {
+                        paras = res.split(",");
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                alert("注册成功！您的用户ID是" + paras[0] + "，您的密码是" + paras[1] + "。请牢记以上登录信息。");
+            })
+        });
+    </script>
+</head>
+
+<body>
+    <form>
+        <center>
+            <div>
+                <h2>
+                    注册
+                </h2>
+                <p>
+                    用户名&emsp;：<input class='username' type="text" />
+                </p>
+                <p>
+                    密&emsp;码&emsp;：<input class='password' type="password" />
+                </p>
+                <p>
+                    确认密码：<input class='confirm_password' type="password" />
+                </p>
+                <button class="register_button">
+                    立即注册
+                </button>
+                <p>
+                    已有账号？<a href="login.html">请登录</a>
+                </p>
+            </div>
+        </center>
+    </form>
+</body>
+
+</html>

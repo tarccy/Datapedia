@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>Data Repository</title>
+    <!--自动加载仓库名称，待完成-->
+    <link rel="stylesheet" href="ztree/css/demo.css" type="text/css">
+	<link rel="stylesheet" href="ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <link rel="stylesheet" href="style.css">
+    <script src="jquery.js"></script>
+	<script type="text/javascript" src="ztree/js/jquery.ztree.core.js"></script>
+    <script>
+        $(document).ready(function () {
+            function GetQueryString(name, url) {
+                url = url || window.location.search.substr(1);
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = url.match(reg);
+                if (r != null) return decodeURI(r[2]);
+                return null;
+            }
+            var name = GetQueryString("repository_id", "");
+            var user_id = GetQueryString("user_id", "");
+            $(".backtomenu_button").hide()
+            $(".logout_button").hide()
+
+            //$(".enable_modify_list_table").hide();
+            $(".repository_table_head").append(name);
+
+
+            /*if (permission == "readonly") {
+                $(".operation_buttons").hide();
+            }*/
+            
+            var setting = {
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                },
+                callback: {
+                    onClick: Node_click,
+                },
+                view: {
+                    showTitle:false,
+                    showLine:false,
+                    showIcon:false,
+                    selectedMulti:false,
+                    dblClickExpand:false,
+                    nameIsHTML:true,
+                },  
+		    };
+
+            function Node_click(event,treeId,treeNode){
+                var url = "";
+                if (datatype == 0) {
+                    url = "picture_dataset.html";
+                }
+                else if (datatype == 1) {
+                    url = "text_dataset.html";
+                }
+                else {
+                    url = "table_dataset.html";
+                }
+                url += "?user_id=" + user_id + "&repository_name=" + name + "&version_id=" + String(treeNode.id-1);
+                window.location.href = url;
+            }
+
+            var now_user = localStorage.getItem("now_user");
+            if (now_user == null) {
+                $(".enable_modify_button").hide();
+                $(".apply_modify_button").hide();
+                $(".cur_user").hide();
+            }
+            else {
+                $(".login_button").hide();
+                $(".cur_user").append(now_user);
+            }
+            var permission = ""
+            if (now_user != user_id) {
+                $(".enable_modify_button").hide();
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "check_permission@" + user_id + "@" + name + "@" + now_user,
+                    success: function (res) {
+                        permission = res;
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                if (permission == "readwrite") {
+                    $(".enable_modify_list_table").empty();
+                    var txt = "<tr><td style=\"color:white;\">你拥有修改权限</td></tr>";
+                    $(".enable_modify_list_table").append(txt);
+                    $(".apply_modify_button").hide();
+                }
+                else {
+                    $(".enable_modify_list_table").empty();
+                    var txt = "<tr><td style=\"color:white;\">你没有修改权限</td></tr>";
+                    $(".enable_modify_list_table").append(txt);
+                }
+            }
+            else {
+                $(".apply_modify_button").hide();
+            }
+
+            let paras = [];
+            let datatype = "", length = 0, version_sum=0;
+            let tree_info;
+            $.ajax({
+                type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: "repository@" + user_id + "@" + name, success: function (res) {
+                    paras = res.split("@");
+                    datatype = parseInt(paras[0]);
+                    length = parseInt(paras[1]);
+                    version_sum=length;
+                    tree_info=paras[2];
+                }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    debugger
+                    // 状态码
+                    console.log(XMLHttpRequest.status);
+                    // 状态
+                    console.log(XMLHttpRequest.readyState);
+                    // 错误信息
+                    console.log(textStatus);
+                    __hideLoading();
+
+                    if (XMLHttpRequest.readyState == 0) {
+                        // 对应登录超时问题，直接跳到登录页面
+                        location.href = '../Login.action';
+                    } else {
+                        $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                    }
+
+                }
+            })
+
+
+            var zNodes = eval(tree_info);
+            $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+
+
+            $(".enable_modify_button").click(function () {
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "view_permission@" + user_id + "@" + name,
+                    success: function (res) {
+                        paras = res.split("@");
+                        var i = 0;
+                        var len = paras.length - 1;
+                        permission_list = []
+                        $(".enable_modify_list_table").empty();
+                        if (len == 0) {
+                            var txt = "<tr><td style=\"color:white;\">当前无用户申请权限</td></tr>";
+                            $(".enable_modify_list_table").append(txt);
+                        }
+                        else {
+                            for (i = 0; i < len; i++) {
+                                var txt = "<tr><td style=\"color:white;\">用户" + String(paras[i]) + "请求权限</td>" +
+                                    "<td><button class=\"modify_button_yes\" id=" + String(paras[i]) + "></button></td>" +
+                                    "<td><button class=\"modify_button_no\" id=" + String(paras[i]) + "></button></td>" +
+                                    "</tr>";
+                                $(".enable_modify_list_table").append(txt);
+                            }
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                $(".enable_modify_list_table").show();
+            });
+            $(".apply_modify_button").click(function () {
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "apply_permission@" + user_id + "@" + name + "@" + now_user,
+                    success: function (res) {
+                        permission = res;
+                        alert("申请已提交");
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+            });
+
+            $(document).on("click", ".modify_button_yes", function () {
+                var cur_user = $(this).attr("id");
+                var txt = "enable@" + user_id + "@" + name + "@" + cur_user + "@1";
+                $.ajax({
+                    type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: txt, success: function (res) {
+                        paras = res.split(",");
+                        datatype = parseInt(paras[0]);
+                        length = parseInt(paras[1]);
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+
+                    }
+                })
+                $(this).parent().parent().hide();
+            });
+
+            $(document).on("click", ".modify_button_no", function () {
+                var cur_user = $(this).attr("id");
+                var txt = "enable@" + user_id + "@" + name + "@" + cur_user + "@0";
+                $.ajax({
+                    type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: txt, success: function (res) {
+                        paras = res.split(",");
+                        datatype = parseInt(paras[0]);
+                        length = parseInt(paras[1]);
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+
+                    }
+                })
+                $(this).parent().parent().hide();
+            });
+
+            $(".jmp2version").click(function() {
+                var page_num=parseInt($(".jmp2version_input").val());
+                if (page_num >= 1 && page_num <= version_sum) {
+                    var url = "";
+                    if (datatype == 0) {
+                        url = "picture_dataset.html";
+                    }
+                    else if (datatype == 1) {
+                        url = "text_dataset.html";
+                    }
+                    else {
+                        url = "table_dataset.html";
+                    }
+                    url += "?user_id=" + user_id + "&repository_name=" + name + "&version_id=" + String(page_num-1);
+                    window.location.href = url;
+                } else {
+                    alert("不存在此版本！")
+                }
+            })
+
+            $(".back_button").click(function () {
+                window.history.go(-1);
+            });
+
+            $(".cur_user").click(function () {
+                $(".backtomenu_button").fadeToggle(300);
+                $(".logout_button").fadeToggle(300);
+            });
+
+            $(".backtomenu_button").click(function () {
+                var url = "datapedia.html?user_id=" + now_user;
+                window.location.href = url;
+            });
+
+            $(".login_button").click(function () {
+                url = "login.html";
+                window.location.href = url;
+            });
+
+            $(".logout_button").click(function () {
+                var txt = "logout" + "@" + now_user;
+                $.ajax({
+                    type: 'post', url: "http://101.200.126.249:8088/", async: false, dataType: "text", data: txt, success: function (res) {
+                    }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                localStorage.removeItem('now_user');
+
+                var url = "search.html";
+                window.location.href = url;
+            })
+        });
+    </script>
+</head>
+
+<body>
+    <button class="back_button">返回</script>
+    </button>
+    <h1 class="repository_table_head" style="color:white">仓库名:</h1>
+
+    <center>
+    <div class="zTreeDemoBackground left">
+		<ul id="treeDemo" class="ztree" style="width: auto; max-width: 500px; height: auto; max-height: 300px; background-color: gray;"></ul>
+	</div>
+    </center>
+
+    <center>
+        <button class="jmp2version">跳转</button><span style="color:white;">到版本</span><input class="jmp2version_input" type="number" min="1" style=" width: 30px; "><span style="color:white;"></span>
+    </center>
+
+    <center><button class="enable_modify_button">查看权限申请</button></center>
+
+    <table class="enable_modify_list_table"></table>
+    <table class="apply_modify_list_table">
+        <tr>
+            <td><button class="apply_modify_button">申请仓库修改权限</button></td>
+        </tr>
+    </table>
+
+    <button class="login_button" style="position:absolute;top:20px;right:80px;">登录</button>
+    <ul class="personal_info">
+        <li class="cur_user">你好,</li>
+        <li><button class="backtomenu_button">主页</button></li>
+        <li><button class="logout_button">登出</button></li>
+    </ul>
+</body>
+
+</html>

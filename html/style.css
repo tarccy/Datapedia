@@ -1,0 +1,510 @@
+button {
+    cursor:pointer;
+}
+
+.even_row{
+    background-color: rgb(16, 183, 238);
+    color: white;
+}
+
+.even_row:hover{
+    background-color: rgb(16, 183, 238);
+    color: green;
+    cursor: pointer;
+}
+
+.odd_row {
+    background-color: rgb(16, 19, 179);
+    color: white;
+}
+
+.odd_row:hover {
+    background-color: rgb(16, 19, 179);
+    color: green;
+    cursor: pointer;
+}
+
+body{
+    background-image: url(./images/background.jpg);
+    background-repeat:no-repeat;
+    color:white;
+}
+
+.repository_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+    margin-bottom: 20px;
+    border: groove;
+}
+
+.repository_table th{
+    text-align: center;
+    margin: 0 auto;
+    background-color: rgb(16, 19, 179);
+    width: 80%;
+    color: white;
+}
+
+.repository_table_head {
+    margin: 20 auto;
+    text-align: center;
+}
+
+.storage_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.storage_table_head {
+    margin-left: 10%;
+}
+
+.add_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.delete_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.modify_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.search_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.modify_text_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.modify_label_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.add_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.add_table_head {
+    margin-left: 10%;
+}
+
+.search_table_head {
+    margin-left: 10%;
+}
+
+.delete_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+.delete_table_head {
+    margin-left: 10%;
+}
+
+.modify_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.modify_table_head {
+    margin-left: 10%;
+}
+
+.modify_text_table_head {
+    margin-left: 10%;
+}
+
+.modify_text_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.modify_label_table_head {
+    margin-left: 10%;
+}
+
+.modify_label_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.search_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.view_historical_tree_button {
+    float: right;
+    margin-right: 10%;
+}
+
+.download_button {
+    float: right;
+    margin-right: 10%;
+}
+
+.operation_buttons {
+    text-align: center;
+}
+
+.add_operation_buttons {
+    text-align: center;
+}
+
+.delete_operation_buttons {
+    text-align: center;
+}
+
+.modify_operation_buttons {
+    text-align: center;
+}
+
+.modify_text_operation_buttons {
+    text-align: center;
+}
+
+.modify_label_operation_buttons {
+    text-align: center;
+}
+
+.operation_button {
+    margin: 1%;
+}
+
+.add_input {
+    text-align: center;
+}
+
+.search_input {
+    text-align: center;
+}
+
+.delete_input {
+    text-align: center;
+}
+
+.modify_text_input {
+    text-align: center;
+}
+
+.modify_label_input {
+    text-align: center;
+}
+
+.modify_input {
+    text-align: center;
+}
+
+.repository_name_input_table {
+    text-align: center;
+    margin: 0 auto;
+}
+
+.table_items_table {
+    text-align: center;
+    margin: 0 auto;
+}
+
+.enable_modify_list_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+.apply_modify_list_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+
+.page-box a {
+    padding: 5px 10px;
+    text-decoration-line: none;
+    background-color: #f4f4f5;
+    margin-left: 5px;
+    /* color: #606266; */
+    border-radius: 2px;
+}
+
+.page-box .pageNumber_now {
+    background-color: #58C7C7;
+    color: #fff;
+}
+
+.tmp_page-box a {
+    padding: 5px 10px;
+    text-decoration-line: none;
+    background-color: #f4f4f5;
+    margin-left: 5px;
+    /* color: #606266; */
+    border-radius: 2px;
+}
+
+.tmp_page-box .pageNumber_now {
+    background-color: #58C7C7;
+    color: #fff;
+}
+
+.backtomenu_button, .logout_button, .page-first, .page-pre, .page-next, .page-last, .page_turn_button, .jmp2version{
+    border: groove;
+    background-color: black;
+    color: white;
+    background-size:100% 100%;
+}
+
+.backtomenu_button:hover,.logout_button:hover, .page-first:hover, .page-pre:hover, .page-next:hover, .page-last:hover, .page_turn_button:hover, .jmp2version:hover{
+    border: groove;
+    background-color: gray;
+    color: white;
+    background-size:100% 100%;
+}
+
+li {
+    list-style: none;
+    font-family: Arial, Helvetica, sans-serif; 
+    margin: 10px;
+    font-size: medium;
+}
+.personal_info{
+    background-color: transparent;
+    text-align: center;
+    position:absolute;
+    top:0px;
+    right:30px;
+}
+
+.cur_user:hover{
+    color: greenyellow;
+    cursor: pointer;
+}
+
+.back_button, .enable_modify_button, .apply_modify_button, .login_button, .login2register, .register_button, .register2login{
+    border: groove;
+    background-color: black;
+    color: white;
+    background-size:100% 100%;
+}
+
+.back_button:hover,.enable_modify_button:hover,.apply_modify_button:hover,.login_button:hover, .login2register:hover, .register_button:hover, .register2login:hover{
+    border: groove;
+    background-color: gray;
+    color: white;
+    background-size:100% 100%;
+}
+
+.reserve_space{
+    width: 100%;
+    height: 200px;
+}
+
+.operation_buttons{
+    position: fixed;
+    background-color: rgb(114, 151, 244);
+    border: 1px solid white;
+    box-shadow: 0 3px 15px 2px black;
+    color: white;
+    text-align: center;
+    bottom: 0px;
+    margin:0 auto;
+    width: 500px;
+    left: 50%;
+    margin-left: -250px;
+    border-radius: 10px;
+}
+
+.create_buttons{
+    position: fixed;
+    background-color: rgb(114, 151, 244);
+    border: 1px solid white;
+    box-shadow: 0 3px 15px 2px black;
+    color: white;
+    text-align: center;
+    bottom: 0px;
+    margin:0 auto;
+    width: 40%;
+    left: 50%;
+    margin-left: -20%;
+    border-radius: 10px;
+}
+
+.create_picture_repository_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/r_pic.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.create_picture_repository_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/r_pic.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.create_text_repository_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/r_text.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.create_text_repository_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/r_text.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.create_table_repository_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/r_table.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.create_table_repository_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/r_table.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.search_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/search.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.search_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/search.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.create_button,.modify_button_yes{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/yes.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.create_button:hover,.modify_button_yes:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/yes.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.cancel_create_button,.modify_button_no{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/no.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.cancel_create_button:hover,.modify_button_no:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/no.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.cloze{
+    position: fixed;
+    z-index: 2000;
+    bottom: 5px;
+    height: 10px;
+    width: 30px;
+    left:50%;
+    border: none;
+    margin-left: -15px;
+    background-color: black;
+    background-image: url("images/cloze.png");
+    transform:rotate(180deg);
+    background-size: 100% 100%;
+}
+
+
+
+

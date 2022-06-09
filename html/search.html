@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>Search</title>
+
+    <link href="http://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="search.css">
+    <script src="jquery.js"></script>
+    <script>
+        $(document).ready(function() {
+            var now_user = localStorage.getItem("now_user");
+
+            $(".backtomenu_button").hide()
+            $(".logout_button").hide()
+            if (now_user==null)
+            {
+                $(".cur_user").hide();
+                $(".back_button").hide();
+            }
+            else
+            {
+                $(".login_button").hide();
+                $(".cur_user").append(now_user);
+            }
+
+
+            $(".search_button").click(function() {
+                var text = $(".search_input_text").val();
+                var user = $(".search_input_user").val();
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "search@" + user + "@" + text,
+                    success: function(res) {
+                        search_entry = res.split("\n");
+                        search_length = search_entry.length - 1;
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                $(".search_table").empty();
+
+                if (search_entry[0][0] == '!') {
+                    alert("该用户不存在！");
+                    return;
+                }
+                var search_result = "<tr><th>仓库名</th><th>仓库链接</th></tr>";
+                $(".search_table").append(search_result);
+                for (let i = 0; i < search_length; i++) {
+                    var txt = "<tr><td>" + search_entry[i] + "</td>";
+                    txt += "<td><div class=\"repository_div\" id=\"" + search_entry[i] + "\"> ";
+                    txt += "点击进入" + "</div></td></tr>";
+                    $(".search_table").append(txt);
+                }
+                $(document).on("click", ".repository_div", function() {
+                    var url = "data_repository.html";
+                    url += "?user_id=" + user + "&repository_id=" + this.id;
+                    window.location.href = url;
+                });
+            })
+
+            $(".back_button").click(function () {
+                window.history.go(-1);
+            });
+
+            $(".cur_user").click(function() {
+                $(".backtomenu_button").fadeToggle(300);
+                $(".logout_button").fadeToggle(300);
+            });
+
+            $(".backtomenu_button").click(function(){
+                var url = "datapedia.html?user_id="+now_user;
+                window.location.href = url;
+            });
+
+            $(".login_button").click(function() {
+                url = "login.html";
+                window.location.href = url;
+            });
+
+            $(".logout_button").click(function() {
+                var txt = "logout" + "@" + now_user;
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: txt,
+                    success: function(res) {},
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                localStorage.removeItem('now_user');
+
+                location.reload();
+            })
+        })
+    </script>
+</head>
+
+<body>
+    <button class="back_button">返回</button>
+    <h1 class=" search_table_head " style="text-align:center">仓库搜索</h1>
+    <div id="container">
+        <div class="search_input">
+            <form>
+                <p>用户id: <input class="search_input_user " size=" 20% " type="text" placeholder="请输入您要搜索的用户id..."> </p>
+                <p>仓库名: <input class="search_input_text " size=" 60% " type="text" placeholder="请输入您要搜索的仓库名..."></p>
+                <button class="search_button" type="button"></button>
+            </form>
+        </div>
+    </div>
+
+
+    <h1 class=" search_table_head " style="text-align:center">检索结果</h1>
+    <table class="search_table" text-align=" center ">
+    </table>
+
+    <button class="login_button" style="position:absolute;top:20px;right:80px;">登录</button>
+    <ul class="personal_info">
+        <li class="cur_user">你好,</li>
+        <li><button class="backtomenu_button">主页</button></li>
+        <li><button class="logout_button">登出</button></li>
+    </ul>
+
+</body>

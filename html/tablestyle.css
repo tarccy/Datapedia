@@ -1,0 +1,529 @@
+button {
+    cursor:pointer;
+}
+
+.repository_head_div{
+    text-align: center;
+}
+
+.repository_table {
+    text-align: center;
+    margin: 20px auto;
+    color: white;
+    background-color: black;
+    width: 80%;
+}
+
+.repository_table {
+    text-align: center;
+    margin: 20px auto;
+    color: white;
+}
+
+.repository_table th{
+    text-align: center;
+    background-color: rgb(16, 19, 179);
+}
+
+.even_row{
+    background-color: rgb(16, 183, 238);
+}
+
+.odd_row {
+    background-color: rgb(16, 19, 179);
+}
+
+.repository_table_head {
+    text-align: center;
+    color: white;
+}
+
+.storage_table {
+    text-align: center;
+    margin: 20px auto;
+    color: white;
+    width: 80%;
+}
+
+.storage_table th{
+    text-align: center;
+    background-color: rgb(16, 19, 179);
+}
+
+.storage_table_head {
+    text-align: center;
+    color:white;
+}
+
+.add_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.delete_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.modify_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.search_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.modify_text_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.modify_label_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.add_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.add_table_head {
+    margin-left: 10%;
+}
+
+.search_table_head {
+    margin-left: 10%;
+}
+
+.delete_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+.delete_table_head {
+    margin-left: 10%;
+}
+
+.modify_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.modify_table_head {
+    margin-left: 10%;
+}
+
+.modify_text_table_head {
+    margin-left: 10%;
+}
+
+.modify_text_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.modify_label_table_head {
+    margin-left: 10%;
+}
+
+.modify_label_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.search_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+.view_historical_tree_button {
+    float: right;
+    margin-right: 10%;
+}
+
+.download_button {
+    height: 40px;
+    width: 80px;
+    background-color: green;
+    color: white;
+    border-radius: 10px;
+    border:groove;
+}
+
+.download_button:hover {
+    height: 40px;
+    width: 80px;
+    background-color: rgb(17, 76, 17);
+    color: white;
+    border-radius: 10px;
+    border:groove;
+}
+
+.operation_buttons, .add_operation_buttons, .delete_operation_buttons, .modify_operation_buttons, .modify_text_operation_buttons , .modify_label_operation_buttons{
+    position: fixed;
+    background-color: rgb(114, 151, 244);
+    border: 1px solid white;
+    box-shadow: 0 3px 15px 2px black;
+    color: white;
+    text-align: center;
+    bottom: 0px;
+    margin:0 auto;
+    width: 500px;
+    left: 50%;
+    margin-left: -250px;
+    border-radius: 10px;
+}
+
+.operation_button {
+    margin: 5px;
+}
+
+.add_input {
+    text-align: center;
+}
+
+.search_input {
+    text-align: center;
+}
+
+.delete_input {
+    text-align: center;
+}
+
+.modify_text_input {
+    text-align: center;
+}
+
+.modify_label_input {
+    text-align: center;
+}
+
+.modify_input {
+    text-align: center;
+}
+
+.repository_name_input_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+.table_items_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+.enable_modify_list_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+.apply_modify_list_table {
+    text-align: center;
+    margin: 0 auto;
+    width: 30%;
+}
+
+
+.page-box a {
+    padding: 5px 10px;
+    text-decoration-line: none;
+    background-color: #f4f4f5;
+    margin-left: 5px;
+    /* color: #606266; */
+    border-radius: 2px;
+}
+
+.page-box {
+    color: white;
+}
+
+.page-box .pageNumber_now {
+    background-color: #58C7C7;
+    color: #fff;
+}
+
+.tmp_page-box a {
+    padding: 5px 10px;
+    text-decoration-line: none;
+    background-color: #f4f4f5;
+    margin-left: 5px;
+    /* color: #606266; */
+    border-radius: 2px;
+}
+
+.tmp_page-box .pageNumber_now {
+    background-color: #58C7C7;
+    color: #fff;
+}
+
+.picture_data {
+    background-color: black;
+    border-radius: 25px;
+    margin: 20px;
+}
+
+.pic_index{
+    color: white;
+    text-align: center;
+    float: left;
+    padding-left: 10px;
+}
+
+body{
+    background-image: url(./images/background.jpg);
+    background-repeat:no-repeat;
+    color: white;
+}
+
+.picture{
+    text-align: center;
+    padding-top: 10px;
+    margin: 10px;
+}
+
+.pic_label{
+    margin-bottom: 10px;
+    color: white;
+    text-align: center;
+}
+
+.tickbox{
+    float:right;
+    padding-right: 10px;
+}
+
+.newlabel{
+    margin-bottom: 10px;
+    background-color: white;
+    outline: none;
+}
+
+.back_button,.backtomenu_button,.login_button, .logout_button, .page-first, .page-pre, .page-next, .page-last, .page_turn_button{
+    border: groove;
+    background-color: black;
+    color: white;
+    background-size:100% 100%;
+}
+
+.back_button:hover,.backtomenu_button:hover,.login_button:hover, .logout_button:hover, .page-first:hover, .page-pre:hover, .page-next:hover, .page-last:hover, .page_turn_button:hover{
+    border: groove;
+    background-color: gray;
+    color: white;
+    background-size:100% 100%;
+}
+
+.add_text_button, .add_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/add.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.add_text_button:hover, .add_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/add.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.delete_text_button, .delete_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/delete.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.delete_text_button:hover, .delete_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/delete.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.modify_button, .modify_modify_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/modify_table.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.modify_button:hover, .modify_modify_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/modify_table.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.add_save_button, .delete_save_button, .modify_save_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/save.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.add_save_button:hover, .delete_save_button:hover, .modify_save_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/save.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.add_submit_button, .delete_submit_button, .modify_submit_button{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/submit.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.add_submit_button:hover, .delete_submit_button:hover, .modify_submit_button:hover{
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/submit.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.return_button {
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/back_to_dataset.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.return_button:hover {
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/back_to_dataset.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.reset_button {
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/reset.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+}
+
+.reset_button:hover {
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    background-image: url("images/reset.png");
+    background-size:100% 100%;
+    margin: 20px;
+    background-repeat:no-repeat;   
+    border: none;
+    filter: invert(100%);
+}
+
+.reserve_space{
+    width: 100%;
+    height: 200px;
+}
+
+.cloze{
+    position: fixed;
+    z-index: 2000;
+    bottom: 5px;
+    height: 10px;
+    width: 30px;
+    left:50%;
+    border: none;
+    margin-left: -15px;
+    background-color: black;
+    background-image: url("images/cloze.png");
+    transform:rotate(180deg);
+    background-size: 100% 100%;
+}
+
+li {
+    list-style-type: none;
+    margin: 10px;
+}
+.personal_info{
+    background-color: transparent;
+    text-align: center;
+    position:absolute;
+    top:0px;
+    right:30px;
+}
+
+.cur_user:hover{
+    color: greenyellow;
+    cursor: pointer;
+}

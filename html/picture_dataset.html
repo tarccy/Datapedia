@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>Dataset</title>
+    <link rel="stylesheet" href="picstyle.css">
+    <script src="jquery.js"></script>
+    <script>
+        //初始操作
+        $(document).ready(function() {
+            function GetQueryString(name, url) {
+                url = url || window.location.search.substr(1);
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = url.match(reg);
+                if (r != null) return decodeURI(r[2]);
+                return null;
+            }
+            var repository_name = GetQueryString("repository_name", "");
+            var version_id = parseInt(GetQueryString("version_id", ""));
+            var user_id = parseInt(GetQueryString("user_id", ""));
+
+            var now_user = localStorage.getItem("now_user");
+            $(".backtomenu_button").hide()
+            $(".logout_button").hide()
+            if (now_user==null)
+            {
+                $(".cur_user").hide();
+            }
+            else
+            {
+                $(".login_button").hide();
+                $(".cur_user").append(now_user);
+            }
+            var checked = new Set(),
+                modified_label = new Map();
+
+            var paras = [];
+            var length = 0;
+            var storage_length = 0;
+
+            $.ajax({
+                type: 'post',
+                url: "http://101.200.126.249:8088/",
+                async: false,
+                dataType: "text",
+                data: "enter@" + user_id + "@" + repository_name + "@" + version_id,
+                success: function(res) {
+                    //paras = res.split("@")
+                    //length = paras.length - 1;
+                    length=parseInt(res*2);
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    debugger
+                    // 状态码
+                    console.log(XMLHttpRequest.status);
+                    // 状态
+                    console.log(XMLHttpRequest.readyState);
+                    // 错误信息
+                    console.log(textStatus);
+                    __hideLoading();
+
+                    if (XMLHttpRequest.readyState == 0) {
+                        // 对应登录超时问题，直接跳到登录页面
+                        location.href = '../Login.action';
+                    } else {
+                        $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                    }
+                }
+            })
+
+            var permission = ""
+            $.ajax({
+                type: 'post',
+                url: "http://101.200.126.249:8088/",
+                async: false,
+                dataType: "text",
+                data: "check_permission@" + user_id + "@" + repository_name + "@" + now_user,
+                success: function(res) {
+                    permission = res;
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    debugger
+                    // 状态码
+                    console.log(XMLHttpRequest.status);
+                    // 状态
+                    console.log(XMLHttpRequest.readyState);
+                    // 错误信息
+                    console.log(textStatus);
+                    __hideLoading();
+
+                    if (XMLHttpRequest.readyState == 0) {
+                        // 对应登录超时问题，直接跳到登录页面
+                        location.href = '../Login.action';
+                    } else {
+                        $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                    }
+                }
+            })
+            if (permission == "readonly") {
+                $(".operation_buttons").hide();
+            }
+
+
+            var is_tmp = 0,
+                is_adding = 0,
+                is_deleting = 0,
+                is_modifying = 0;
+            $(".tmp_page-box").hide();
+
+            $(".repository_table_head").append(repository_name + ":" + "版本" + String(version_id + 1));
+            $(".storage_table_head").hide();
+            $(".storage_table").hide();
+
+            $(".add_operation_buttons").hide();
+            $(".add_table_head").hide();
+            $(".add_table").hide();
+            $(".add_input").hide();
+
+            $(".delete_operation_buttons").hide();
+            $(".delete_table_head").hide();
+            $(".delete_table").hide();
+            $(".delete_input").hide();
+
+            $(".modify_label_operation_buttons").hide();
+            $(".modify_label_table_head").hide();
+            $(".modify_label_table").hide();
+            $(".modify_label_input").hide();
+
+            $(".back_button").click(function() {
+                window.history.go(-1);
+            });
+
+            let idx = [],
+                picture = [],
+                label = [];
+            let storage_idx = [],
+                storage_picture = [],
+                storage_label = [];
+
+            for (let i = 0; i < length; i += 2) {
+                idx.push(i / 2 + 1);
+                //picture.push(paras[i / 2]);
+                //label.push(paras[i / 2 + (length) / 2]);
+            }
+            /*for (let i = 0; i < length / 2; i++) {
+                var txt = "<tr><td>";
+                txt += String(idx[i]) + "</td><td>" + "<img " + " src=\"data:image/jpg;base64," + picture[i] + "\">" + "</td><td>" + label[i] + "</td></tr>";
+                $(".repository_table").append(txt);
+            }*/
+
+            length = idx.length;
+
+            let add_idx = [],
+                add_picture = [],
+                add_label = [];
+            let add_length = 0;
+
+            function tmp_dataset() {
+                $(".operation_buttons").hide();
+                $(".repository_table_head").hide();
+                $(".repository_table").hide();
+
+                $(".page-box").hide();
+                $(".tmp_page-box").show();
+                is_tmp = 1;
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "enter_tmp@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {
+                        storage_length=parseInt(res*2);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                currentPage = 1;
+                pageSize = 10;
+                total_size = 1;
+                total = storage_length / 2;
+                $(".page-count").text("共" + String(total) + "个数据");
+                if (total >= 0) {
+                    page_change();
+                }
+
+            }
+
+            $(".add_picture_button").click(function() {
+                add_form();
+                $(".add_button").hide();
+                $(".add_save_button").show();
+            });
+
+
+            var add_one_pic;
+            var fileName;
+            var fileStream;
+
+            function add_form() {
+                is_adding = 1;
+                add_one_pic=null;
+                $(".operation_buttons").hide();
+                $(".repository_table_head").hide();
+                $(".repository_table").hide();
+
+                $(".page-box").hide();
+                $(".tmp_page-box").show();
+                is_tmp = 1;
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "enter_tmp@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {
+                        storage_length=parseInt(res*2);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                currentPage = 1;
+                pageSize = 10;
+                total_size = 1;
+                total = storage_length / 2;
+                $(".page-count").text("共" + String(total) + "个数据");
+                if (total >= 0) {
+                    page_change();
+                }
+                // $(".storage_table").empty();
+                // $(".storage_table").append("<tr\><th style=\"text-align: center;\">索引</th\><th style=\"text - align: center; \">图片数据</th\><th style=\"text-align: center;\"\>标签</th\></tr\>");
+
+
+                // for (let i = 0; i < storage_length; i += 2) {
+                //     storage_idx.push(i / 2 + 1);
+                //     storage_picture.push(paras[i / 2]);
+                //     storage_label.push(paras[i / 2 + (storage_length) / 2]);
+                // }
+                // for (let i = 0; i < storage_length / 2; i++) {
+                //     var txt = "<tr><td>";
+                //     txt += String(storage_idx[i]) + "</td><td>" + "<img " + " src=\"data:image/jpg;base64," + storage_picture[i] + "\">" + "</td><td>" + storage_label[i] + "</td></tr>";
+                //     $(".storage_table").append(txt);
+                // }
+                // storage_length = storage_idx.length;
+
+                var locked;
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "lock@" + user_id + "@" + repository_name + "@" + version_id + "@" + now_user,
+                    success: function(res) {
+                        if (res != "wrong") {
+                            $(".storage_table_head").show();
+                            $(".storage_table").show();
+                            $(".add_table_head").show();
+                            $(".add_table").show();
+                            $(".add_operation_buttons").show();
+                            $(".add_input").show();
+                        } else {
+                            $(".storage_table_head").show();
+                            $(".storage_table").show();
+                            alert("该仓库正在被占用！");
+                        }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                if (!locked) {
+                    $.ajax({
+                        type: 'post',
+                        url: "http://101.200.126.249:8088/",
+                        async: false,
+                        dataType: "text",
+                        data: "add@" + user_id + "@" + repository_name + "@" + version_id,
+                        success: function(res) {
+                            paras = res.split("@");
+                            length = paras.length;
+                            //alert(paras);
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            debugger
+                            // 状态码
+                            console.log(XMLHttpRequest.status);
+                            // 状态
+                            console.log(XMLHttpRequest.readyState);
+                            // 错误信息
+                            console.log(textStatus);
+                            __hideLoading();
+
+                            if (XMLHttpRequest.readyState == 0) {
+                                // 对应登录超时问题，直接跳到登录页面
+                                location.href = '../Login.action';
+                            } else {
+                                $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                            }
+                        }
+                    })
+                }
+            }
+
+            $("#up").click(function() {
+                var reader = new FileReader();
+                var AllowImgFileSize = 1<<40; //上传图片最大值(单位字节)（ 2 M = 2097152 B ）超过2M上传失败
+                var file = $("#upfile")[0].files[0];
+                var zipdata;
+                if (file) {
+                    //reader.readAsArrayBuffer(file);
+                    //zipdata=reader.readAsBinaryString(file);
+                    var zipBase64 = reader.readAsDataURL(file);
+                    reader.onload = function(e) {
+                        if (false) {
+                            alert('上传失败，请上传不大于2M的图片！');
+                            return;
+                        } else {
+                            add_one_pic = reader.result;
+                            //alert(reader.result);
+                            add_one_pic = add_one_pic.slice(add_one_pic.indexOf(';base64,') + 8);
+                            alert("上传成功！");
+                        }
+                    }
+                }
+            });
+
+            $(".add_button").click(function() {
+                add_form();
+                $(".add_button").hide();
+                $(".add_save_button").show();
+            });
+
+            let pre_add_save_cnt = 0;
+
+            $(".add_save_button").click(function() {
+                /*for (let i = pre_add_save_cnt; i < add_length; i++) {
+                    var txt = "<tr><td>";
+                    txt += String(add_idx[i]) + "</td><td>" + "<img src=\"data:image/jpg;base64," + add_picture[i] + "\">" + "</td><td>" + add_label[i] + "</td></tr>";
+                    $(".storage_table").append(txt);
+                }*/
+                if (add_one_pic!=null)
+                {
+                    $.ajax({
+                        type: 'post',
+                        url: "http://101.200.126.249:8088/",
+                        async: false,
+                        dataType: "text",
+                        data: "add@" + user_id + "@" + repository_name + "@" + version_id + "@" + add_one_pic,
+                        success: function(res) {
+                            paras = res.split("@");
+                            //alert(paras);
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            debugger
+                            // 状态码
+                            console.log(XMLHttpRequest.status);
+                            // 状态
+                            console.log(XMLHttpRequest.readyState);
+                            // 错误信息
+                            console.log(textStatus);
+                            __hideLoading();
+
+                            if (XMLHttpRequest.readyState == 0) {
+                                // 对应登录超时问题，直接跳到登录页面
+                                location.href = '../Login.action';
+                            } else {
+                                $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                            }
+                        }
+                        })
+                    pre_add_save_cnt = add_length;
+                }
+                else
+                    alert("未上传文件！");
+                
+
+                    $.ajax({
+                        type: 'post',
+                        url: "http://101.200.126.249:8088/",
+                        async: false,
+                        dataType: "text",
+                        data: "save@" + user_id + "@" + repository_name + "@" + version_id + "@" + now_user,
+                        success: function(res) {},
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            debugger
+                            // 状态码
+                            console.log(XMLHttpRequest.status);
+                            // 状态
+                            console.log(XMLHttpRequest.readyState);
+                            // 错误信息
+                            console.log(textStatus);
+                            __hideLoading();
+
+                            if (XMLHttpRequest.readyState == 0) {
+                                // 对应登录超时问题，直接跳到登录页面
+                                location.href = '../Login.action';
+                            } else {
+                                $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                            }
+                        }
+                    })
+                    is_adding=0;
+                    tmp_dataset();
+                    $(".add_button").show();
+                    $(".add_save_button").hide();
+            })
+
+            $(".add_submit_button").click(function() {
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "submit@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {
+                        //alert(paras);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                alert("创建新版本成功");
+                location.reload();
+            })
+
+            let delete_idx = [],
+                delete_picture = [],
+                delete_label = [],
+                delete_length = 0;
+
+
+            function delete_form() {
+                is_deleting = 1;
+                checked = new Set();
+                delete_idx = [];
+                delete_picture = [];
+                delete_label = [];
+                delete_length = 0;
+                $(".operation_buttons").hide();
+                $(".repository_table_head").hide();
+                $(".repository_table").hide();
+
+                $(".page-box").hide();
+                $(".tmp_page-box").show();
+                is_tmp = 1;
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "enter_tmp@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {
+                        storage_length=parseInt(res*2);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                currentPage = 1;
+                pageSize = 10;
+                total_size = 1;
+                total = storage_length / 2;
+                $(".page-count").text("共" + String(total) + "个数据");
+                if (total >= 0) {
+                    page_change();
+                }
+
+                // var tmp = $(".storage_table").find("tr").html();
+                // //alert(tmp);
+                // $(".storage_table").find("tr").html(tmp + "<th style=\"text-align: center;\">删除</th>");
+
+                // for (let i = 0; i < storage_length; i += 2) {
+                //     storage_idx.push(i / 2 + 1);
+                //     storage_picture.push(paras[i / 2]);
+                //     storage_label.push(paras[i / 2 + (storage_length) / 2]);
+                // }
+                // for (let i = 0; i < storage_length / 2; i++) {
+                //     var txt = "<tr><td>";
+                //     txt += String(storage_idx[i]) + "</td><td>" + "<img " + " src=\"data:image/jpg;base64," + storage_picture[i] + "\">" + "</td><td>" + storage_label[i]
+                //         + "</td><td><input class=\"tickbox\" type=\"checkbox\" name=\"hui\" value=\"\" /></td></tr>";
+                //     $(".storage_table").append(txt);
+                // }
+                // storage_length = storage_idx.length;
+
+                var locked;
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "lock@" + user_id + "@" + repository_name + "@" + version_id + "@" + now_user,
+                    success: function(res) {
+                        if (res != "wrong") {
+                            $(".storage_table_head").show();
+                            $(".storage_table").show();
+                            $(".delete_table_head").show();
+                            $(".delete_table").show();
+                            $(".delete_operation_buttons").show();
+                            $(".delete_input").show();
+                        } else {
+                            $(".storage_table_head").show();
+                            $(".storage_table").show();
+                            alert("该仓库正在被占用！");
+                        }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                if (!locked) {
+
+                    $.ajax({
+                        type: 'post',
+                        url: "http://101.200.126.249:8088/",
+                        async: false,
+                        dataType: "text",
+                        data: "delete@" + user_id + "@" + repository_name + "@" + version_id,
+                        success: function(res) {},
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            debugger
+                            // 状态码
+                            console.log(XMLHttpRequest.status);
+                            // 状态
+                            console.log(XMLHttpRequest.readyState);
+                            // 错误信息
+                            console.log(textStatus);
+                            __hideLoading();
+
+                            if (XMLHttpRequest.readyState == 0) {
+                                // 对应登录超时问题，直接跳到登录页面
+                                location.href = '../Login.action';
+                            } else {
+                                $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                            }
+                        }
+                    })
+                }
+            }
+
+            $(".delete_picture_button").click(function() {
+                delete_form();
+                $(".delete_button").hide();
+                $(".delete_save_button").show();
+            });
+
+            $(".delete_button").click(function() {
+                delete_form();
+                $(".delete_button").hide();
+                $(".delete_save_button").show();
+            });
+
+            $(".delete_save_button").click(function() {
+                let m_len = checked.size;
+                let deletepics = Array.from(checked);
+                for (let i = 0; i < m_len; i++) {
+                    //alert(deletepics[i]);
+                    if (delete_idx.indexOf(deletepics[i]) != -1) {
+
+                    } else {
+                        $.ajax({
+                            type: 'post',
+                            url: "http://101.200.126.249:8088/",
+                            async: false,
+                            dataType: "text",
+                            data: "delete@" + user_id + "@" + repository_name + "@" + version_id + "@" + String(deletepics[i]),
+                            success: function(res) {
+                                var picture_to_delete = storage_picture[deletepics[i] - 1];
+                                var picture_to_delete_label = storage_label[deletepics[i] - 1];
+                                delete_idx.push(deletepics[i]);
+                                delete_picture.push(picture_to_delete);
+                                delete_label.push(picture_to_delete_label);
+                                delete_length += 1;
+                                //var txt = "<tr><td>";
+                                //txt += String(deletepics[i]) + "</td><td>" + "<img src=\"data:image/jpg;base64," + picture_to_delete + "\">" + "</td><td>" + picture_to_delete_label + "</td></tr>";
+                                //$(".delete_table").append(txt);
+                            },
+                            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                                debugger
+                                // 状态码
+                                console.log(XMLHttpRequest.status);
+                                // 状态
+                                console.log(XMLHttpRequest.readyState);
+                                // 错误信息
+                                console.log(textStatus);
+                                __hideLoading();
+
+                                if (XMLHttpRequest.readyState == 0) {
+                                    // 对应登录超时问题，直接跳到登录页面
+                                    location.href = '../Login.action';
+                                } else {
+                                    $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                                }
+                            }
+                        })
+                    }
+                }
+
+                var tmp = total - delete_idx.length;
+                $(".page-count").text("共" + String(tmp) + "个数据");
+
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "save@" + user_id + "@" + repository_name + "@" + version_id + "@" + now_user,
+                    success: function(res) {},
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+
+                    }
+                })
+                is_deleting = 0;
+                tmp_dataset();
+                $(".delete_button").show();
+                $(".delete_save_button").hide();
+            })
+
+            $(".delete_submit_button").click(function() {
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "submit@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {},
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                is_deleting = 0;
+                alert("创建新版本成功");
+                location.reload();
+            })
+
+            let modify_label_idx = [],
+                modify_label_label = [];
+
+            function modify_form() {
+                is_modifying = 1;
+                modified_label = new Map();
+                modify_label_idx = [];
+                modify_label_label = [];
+                $(".operation_buttons").hide();
+                $(".repository_table_head").hide();
+                $(".repository_table").hide();
+
+                $(".page-box").hide();
+                $(".tmp_page-box").show();
+                is_tmp = 1;
+
+                var tmp = $(".storage_table").find("tr").html();
+                //alert(tmp);
+                $(".storage_table").find("tr").html(tmp + "<th style=\"text-align: center;\">新标签</th>")
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "enter_tmp@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {
+                        storage_length=parseInt(res*2);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                currentPage = 1;
+                pageSize = 10;
+                total_size = 1;
+                total = storage_length / 2;
+                $(".page-count").text("共" + String(total) + "个数据");
+                if (total >= 0) {
+                    page_change();
+                }
+
+                var locked;
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "lock@" + user_id + "@" + repository_name + "@" + version_id + "@" + now_user,
+                    success: function(res) {
+                        if (res != "wrong") {
+                            $(".storage_table_head").show();
+                            $(".storage_table").show();
+                            $(".modify_label_table_head").show();
+                            $(".modify_label_table").show();
+                            $(".modify_label_operation_buttons").show();
+                            $(".modify_label_input").show();
+                        } else {
+                            $(".storage_table_head").show();
+                            $(".storage_table").show();
+                            alert("该仓库正在被占用！");
+                        }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                if (!locked) {
+                    $.ajax({
+                        type: 'post',
+                        url: "http://101.200.126.249:8088/",
+                        async: false,
+                        dataType: "text",
+                        data: "modify@" + user_id + "@" + repository_name + "@" + version_id,
+                        success: function(res) {
+                            paras = res.split("@");
+                            length = paras.length;
+                            //alert(paras);
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            debugger
+                            // 状态码
+                            console.log(XMLHttpRequest.status);
+                            // 状态
+                            console.log(XMLHttpRequest.readyState);
+                            // 错误信息
+                            console.log(textStatus);
+                            __hideLoading();
+
+                            if (XMLHttpRequest.readyState == 0) {
+                                // 对应登录超时问题，直接跳到登录页面
+                                location.href = '../Login.action';
+                            } else {
+                                $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                            }
+                        }
+                    })
+                }
+            }
+
+            $(".modify_label_button").click(function() {
+                modify_form();
+                $(".modify_label_modify_button").hide();
+                $(".modify_label_save_button").show();
+            });
+
+            $(".modify_label_modify_button").click(function() {
+                modify_form();
+                $(".modify_label_modify_button").hide();
+                $(".modify_label_save_button").show();
+            });
+
+            $(".modify_label_save_button").click(function() {
+                let m_len = modified_label.size;
+                for (let i of modified_label.keys()) {
+                    let label_after_modify = modified_label.get(i);
+                    console.log(label_after_modify);
+                    if (modify_label_idx.indexOf(i) != -1) {
+
+                    } else {
+                        $.ajax({
+                            type: 'post',
+                            url: "http://101.200.126.249:8088/",
+                            async: false,
+                            dataType: "text",
+                            data: "modify@" + user_id + "@" + repository_name + "@" + version_id + "@" + String(i) + "@" + String(label_after_modify),
+                            success: function(res) {
+                                modify_label_idx.push(i);
+                                modify_label_label.push(label_after_modify);
+                                //var txt = "<tr><td>";
+                                //txt += String(i + 1) + "</td><td>" + "<img src=\"data:image/jpg;base64," + storage_picture[i] + "\">"
+                                //    + "</td><td>" + storage_label[i] + "</td><td>" + label_after_modify + "</td></tr>";
+                                //$(".modify_label_table").append(txt);
+                            },
+                            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                                debugger
+                                // 状态码
+                                console.log(XMLHttpRequest.status);
+                                // 状态
+                                console.log(XMLHttpRequest.readyState);
+                                // 错误信息
+                                console.log(textStatus);
+                                __hideLoading();
+
+                                if (XMLHttpRequest.readyState == 0) {
+                                    // 对应登录超时问题，直接跳到登录页面
+                                    location.href = '../Login.action';
+                                } else {
+                                    $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                                }
+                            }
+                        })
+                    }
+                }
+                /*$(".storage_table").empty();
+                $(".storage_table").append("<tr><th style=\"text-align: center;\">索引</th><th style=\"text-align: center;\">图片数据</th><th style=\"text-align: center;\">标签</th></tr>");
+
+                for (let i = 0; i < storage_length; i++) {
+                    if (modify_label_idx.indexOf(i + 1) != -1) {
+                        let txt = "<tr><td>";
+                        txt += String(i + 1) + "</td><td>" + "<img src=\"data:image/jpg;base64," + storage_picture[i] + "\">" + "</td><td>" + modify_label_label[modify_label_idx.indexOf(i + 1)] + "</td></tr>";
+                        $(".storage_table").append(txt);
+                    } else {
+                        let txt = "<tr><td>";
+                        txt += String(i + 1) + "</td><td>" + "<img src=\"data:image/jpg;base64," + storage_picture[i] + "\">" + "</td><td>" + storage_label[i] + "</td></tr>";
+                        $(".storage_table").append(txt);
+                    }
+                }*/
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "save@" + user_id + "@" + repository_name + "@" + version_id + "@" + now_user,
+                    success: function(res) {
+                        paras = res.split(",");
+                        length = parseInt(paras[0]);
+                        //alert(paras);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                is_modifying = 0;
+                tmp_dataset();
+                $(".modify_label_modify_button").show();
+                $(".modify_label_save_button").hide();
+            })
+
+            $(".modify_label_submit_button").click(function() {
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "submit@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {
+                        paras = res.split(",");
+                        length = parseInt(paras[0]);
+                        //alert(paras);
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                alert("创建新版本成功");
+                location.reload();
+            })
+
+            $(".reset_button").click(function() {
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: "reset@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {},
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                location.reload();
+            })
+
+            $(".return_button").click(function() {
+                location.reload();
+            })
+
+            $(".download_button").click(function() {
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: true,
+                    dataType: "text",
+                    data: "download@" + user_id + "@" + repository_name + "@" + version_id,
+                    success: function(res) {
+                        var a = document.createElement("a");
+                        a.href = res;
+                        document.body.appendChild(a);
+                        a.click();
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+            });
+
+            var currentPage = 1;
+            var pageSize = 10;
+            var total = length; // 数据条数
+            var total_size = 1; // 页面数
+
+            function page_change() {
+                var pages = [];
+                pages.push(currentPage);
+                total_size = Math.ceil(total / pageSize);
+                for (var i = 1; i < 5; i++) {
+                    var a = currentPage + i;
+                    var b = currentPage - i;
+                    if (pages.length < 5) {
+                        if (a <= total_size) pages.push(a);
+                        if (b > 0) pages.push(b);
+                    }
+                }
+                pages.sort(function compare(val1, val2) {
+                    return val1 - val2;
+                });
+
+
+                $(".page-show").empty();
+                var content = "";
+                for (var i = 0; i < pages.length; i++) {
+                    if (pages[i] == currentPage) {
+                        content += "<button class=\"pageNumber_now\" data='" + pages[i] + "'>" + pages[i] + "</button>";
+                    } else {
+                        content += "<button class=\"pageNumber\" data='" + pages[i] + "'>" + pages[i] + "</button>";
+                    }
+                }
+                $(".page-show").append(content);
+
+                var l = pageSize * (currentPage - 1) + 1,
+                    r = Math.min(pageSize * currentPage, total);
+
+                if (is_tmp == 0) {
+                    var txt = "view_dataset@" + user_id + "@" + repository_name + "@" + version_id + "@" + String(l) + "@" + String(r);
+                } else {
+                    var txt = "view_tmp_dataset@" + user_id + "@" + repository_name + "@" + version_id + "@" + String(l) + "@" + String(r);
+                }
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: txt,
+                    success: function(res) {
+                        data_list = res.split("@");
+                        if (is_tmp == 0) {
+                            length = data_list.length - 1;
+                        } else {
+                            storage_length = data_list.length - 1;
+                        }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+
+                idx = [], picture = [], label = [];
+                storage_idx = [], storage_picture = [], storage_label = [];
+
+                if (is_tmp == 0) {
+                    $(".repository_table").empty();
+                    //$(".repository_table").append("<tr\><th style=\"text-align: center;\">索引</th\><th style=\"text - align: center; \">图片数据</th\><th style=\"text-align: center;\"\>标签</th\></tr\>");
+                    for (let i = 0; i < length; i += 2) {
+                        idx.push(l + i / 2);
+                        picture.push(data_list[i / 2]);
+                        label.push(data_list[i / 2 + (length) / 2]);
+                    }
+                    var txt = "";
+                    for (let i = 0; i < length / 2; i++) {
+                        if (i%5==0)
+                        {
+                            txt+="<tr>";
+                            if (i!=0)
+                                txt+="</tr>";
+                        }
+                        txt+="<td><div class=\"picture_data\">";
+                        txt+="<div class=\"pic_index\">"+String(idx[i])+"</div>"
+                        +"<div class=\"picture\">"+"<img " + " src=\"data:image/jpg;base64," + picture[i] + "\">"+"</div>"
+                        +"<div class=\"pic_label\">"+label[i]+"</div></div></td>"
+                        //txt += String(idx[i]) + "</td><td>" + "<img " + " src=\"data:image/jpg;base64," + picture[i] + "\">" + "</td><td>" + label[i] + "</td></tr>";
+                    }
+                    txt+="</tr>";
+                    $(".repository_table").append(txt);
+                    length = idx.length;
+                } else {
+                    $(".storage_table").empty();
+                    //$(".storage_table").append("<tr\><th style=\"text-align: center;\">索引</th\><th style=\"text - align: center; \">图片数据</th\><th style=\"text-align: center;\"\>标签</th\></tr\>");
+                    for (let i = 0; i < storage_length; i += 2) {
+                        storage_idx.push(l + i / 2);
+                        storage_picture.push(data_list[i / 2]);
+                        storage_label.push(data_list[i / 2 + (storage_length) / 2]);
+                    }
+                    if (is_adding == 1) {
+                        var txt="";
+                        for (let i = 0; i < storage_length / 2; i++) {
+                            if (i%5==0)
+                            {
+                                txt+="<tr>";
+                                if (i!=0)
+                                    txt+="</tr>";
+                            }
+                            txt+="<td><div class=\"picture_data\">";
+                            txt+="<div class=\"pic_index\">"+String(storage_idx[i])+"</div>"
+                            +"<div class=\"picture\">"+"<img " + " src=\"data:image/jpg;base64," + storage_picture[i] + "\">"+"</div>"
+                            +"<div class=\"pic_label\">"+storage_label[i]+"</div></div></td>";
+                        }
+                        txt+="</tr>";
+                        $(".storage_table").append(txt);
+                        storage_length = storage_idx.length;
+                    } else if (is_deleting == 1) {
+                        //var tmp = $(".storage_table").find("tr").html();
+                        //alert(tmp);
+                        //$(".storage_table").find("tr").html(tmp + "<th style=\"text-align: center;\">删除</th>");
+                        var txt="";
+                        for (let i = 0; i < storage_length / 2; i++) {
+                            if (i%5==0)
+                            {
+                                txt+="<tr>";
+                                if (i!=0)
+                                    txt+="</tr>";
+                            }
+                            txt+="<td><div class=\"picture_data\">";
+                            txt+="<div class=\"pic_index\">"+String(storage_idx[i])+"</div>"
+                            if (checked.has(storage_idx[i])) {
+                                txt += "<input class=\"tickbox\" type=\"checkbox\" name=\"hui\" value=" + String(storage_idx[i]) + " checked=\"checked\"/>";
+                            } else {
+                                txt += "<input class=\"tickbox\" type=\"checkbox\" name=\"hui\" value=" + String(storage_idx[i]) + " />";
+                            }
+                            txt+="<div class=\"picture\">"+"<img " + " src=\"data:image/jpg;base64," + storage_picture[i] + "\">"+"</div>"
+                            +"<div class=\"pic_label\">"+storage_label[i]+"</div></div></td>";
+                        }
+                        txt+="</tr>";
+                        $(".storage_table").append(txt);
+                        storage_length = storage_idx.length;
+                    } else if (is_modifying == 1) {
+                        //var tmp = $(".storage_table").find("tr").html();
+                        //alert(tmp);
+                        //$(".storage_table").find("tr").html(tmp + "<th style=\"text-align: center;\">新标签</th>");
+                        var txt="";
+                        for (let i = 0; i < storage_length / 2; i++) {
+                            if (i%5==0)
+                            {
+                                txt+="<tr>";
+                                if (i!=0)
+                                    txt+="</tr>";
+                            }
+                            txt+="<td><div class=\"picture_data\">";
+                            txt+="<div class=\"pic_index\">"+String(storage_idx[i])+"</div>"
+                            txt+="<div class=\"picture\">"+"<img " + " src=\"data:image/jpg;base64," + storage_picture[i] + "\">"+"</div>"
+                            +"<div class=\"pic_label\">"+storage_label[i]+"</div>";
+                            if (modified_label.has(storage_idx[i])) {
+                                txt += "<input type=\"text\" class=\"newlabel\" data=" + storage_idx[i] + " value=" + modified_label.get(storage_idx[i]) + " />";
+                            } else {
+                                txt += "<input type=\"text\" class=\"newlabel\" data=" + storage_idx[i] + " placeholder=\"新标签\"/>";
+                            }
+                            txt+="</div></td>";
+                        }
+                        txt+="</tr>";
+                        $(".storage_table").append(txt);
+                        storage_length = storage_idx.length;
+                    } else {
+                        var txt="";
+                        for (let i = 0; i < storage_length / 2; i++) {
+                            if (i%5==0)
+                            {
+                                txt+="<tr>";
+                                if (i!=0)
+                                    txt+="</tr>";
+                            }
+                            txt+="<td><div class=\"picture_data\">";
+                            txt+="<div class=\"pic_index\">"+String(storage_idx[i])+"</div>"
+                            +"<div class=\"picture\">"+"<img " + " src=\"data:image/jpg;base64," + storage_picture[i] + "\">"+"</div>"
+                            +"<div class=\"pic_label\">"+storage_label[i]+"</div></div></td>";
+                        }
+                        txt+="</tr>";
+                        $(".storage_table").append(txt);
+                        storage_length = storage_idx.length;
+                    }
+                }
+            }
+
+            $(".page_turn_button").click(function() {
+                var page_num;
+                if (is_tmp==0){
+                    page_num = parseInt($(".page_turn_input").val());
+                }
+                else{
+                    page_num = parseInt($(".tmp_page_turn_input").val());
+                }
+                if (page_num >= 1 && page_num <= total_size) {
+                    currentPage = page_num;
+                    page_change();
+                } else {
+                    alert("不存在此页面！")
+                }
+            })
+
+            $(document).on("click", ".pageNumber", function() {
+                var page_num = parseInt($(this).attr("data"));
+                currentPage = page_num;
+                page_change();
+            });
+
+            $(document).on("change", ".tickbox", function() {
+                if ($(this).prop("checked") == true) {
+                    checked.add(parseInt($(this).attr("value")));
+                } else {
+                    checked.delete(parseInt($(this).attr("value")));
+                }
+            });
+
+            $(document).on("blur", ".newlabel", function() {
+                modified_label.set(parseInt($(this).attr("data")), $(this).val());
+            });
+
+            $(".pageSizeSelect").change(function() {
+                pageSize = parseInt($(this).find("option:selected").val());
+                currentPage = 1;
+                page_change();
+            })
+
+            $(".page-first").click(function() {
+                if (currentPage != 1) {
+                    currentPage = 1;
+                    page_change();
+                }
+            })
+
+            $(".page-pre").click(function() {
+                if (currentPage != 1) {
+                    currentPage = currentPage - 1;
+                    page_change();
+                }
+            })
+
+            $(".page-next").click(function() {
+                if (currentPage != total_size) {
+                    currentPage = currentPage + 1;
+                    page_change();
+                }
+            })
+
+            $(".page-last").click(function() {
+                if (currentPage != total_size) {
+                    currentPage = total_size;
+                    page_change();
+                }
+            })
+
+
+            $(".page-count").text("共" + String(total) + "个数据");
+            if (total >= 0) {
+                page_change()
+            }
+
+            $(".cloze").click(function() {
+                var ifin=($(this).css("transform")!="none");
+                if (ifin)
+                {
+                    $(this).next().fadeOut(500);
+                    $(this).css("transform","none");
+                }
+                else
+                {
+                    $(this).next().fadeIn(500);
+                    $(this).css("transform","rotate(180deg)");
+                }
+                $(this).css("display","block");
+            });
+
+            $(".cur_user").click(function() {
+                $(".backtomenu_button").fadeToggle(300);
+                $(".logout_button").fadeToggle(300);
+            });
+
+            $(".backtomenu_button").click(function(){
+                var url = "datapedia.html?user_id="+now_user;
+                window.location.href = url;
+            });
+
+            $(".login_button").click(function() {
+                url = "login.html";
+                window.location.href = url;
+            });
+
+            $(".logout_button").click(function() {
+                var txt = "logout" + "@" + now_user;
+
+                $.ajax({
+                    type: 'post',
+                    url: "http://101.200.126.249:8088/",
+                    async: false,
+                    dataType: "text",
+                    data: txt,
+                    success: function(res) {},
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        debugger
+                        // 状态码
+                        console.log(XMLHttpRequest.status);
+                        // 状态
+                        console.log(XMLHttpRequest.readyState);
+                        // 错误信息
+                        console.log(textStatus);
+                        __hideLoading();
+
+                        if (XMLHttpRequest.readyState == 0) {
+                            // 对应登录超时问题，直接跳到登录页面
+                            location.href = '../Login.action';
+                        } else {
+                            $.messager.alert('提示', '系统内部错误，请联系管理员处理！', 'info');
+                        }
+                    }
+                })
+                localStorage.removeItem('now_user');
+
+                var url = "search.html";
+                window.location.href = url;
+            })
+        });
+
+    </script>
+</head>
+
+<body>
+    <button class="back_button">返回</button>
+    <div class="repository_head_div">
+        <h1 class="repository_table_head"></h1>
+        <button class="download_button">下载</button>
+    </div>
+    <table class="repository_table"  text-align="center">
+        <tr>
+        </tr>
+    </table>
+
+    <h1 class="storage_table_head">暂存数据集</h1>
+    <table class="storage_table" id="storage_table" text-align="center">
+        <tr>
+            <th style="text-align: center;">索引</th>
+            <th style="text-align: center;">图片数据</th>
+            <th style="text-align: center;">标签</th>
+        </tr>
+    </table>
+
+    <center>
+        <div class="tmp_page-box" style="margin-top: 10px;font-size: 14px">
+            <span class="page-limits">
+                <select lay-ignore="" style="height: 25px" class="pageSizeSelect">
+                    <option value="10" selected>10 条/页</option>
+                    <option value="20">20 条/页</option>
+                    <option value="30">30 条/页</option>
+                    <option value="40">40 条/页</option>
+                    <option value="50">50 条/页</option>
+                </select>
+            </span>
+
+            <button class="page-first">首页</button>
+            <button class="page-pre">上一页</button>
+            <span class="page-show"></span>
+            <button class="page-next">下一页</button>
+            <button class="page-last">末页</button>
+            <button class="page_turn_button">跳转</button>到<input class="tmp_page_turn_input" type="number" min="1" style="width: 30px;">页
+
+            <span class="page-count"></span>
+        </div>
+    </center>
+
+    <div class=" add_input " margin=" 0 auto ">
+        <table class=" add_input_table " text-align="center">
+            <tr>
+                <tr><input type="file" id="upfile"></tr>
+                <tr><button id="up">确认上传</button></tr>
+            </tr>
+        </table>
+    </div>
+
+    <div class=" delete_input " margin=" 0 auto ">
+        <table class=" delete_input_table " text-align=" center ">
+            <tr>
+                <td>
+                    <p></p>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class=" modify_input " margin=" 0 auto ">
+        <table class=" modify_input_table " text-align=" center ">
+            <tr>
+                <td>
+                    <p></p>
+                </td>
+                <td></td>
+                <tr></tr>
+            </tr>
+        </table>
+    </div>
+
+
+    <center>
+        <div class="page-box" style="margin-top: 10px;font-size: 14px">
+            <span class="page-limits">
+                <select lay-ignore="" style="height: 25px" class="pageSizeSelect">
+                    <option value="10" selected>10 条/页</option>
+                    <option value="20">20 条/页</option>
+                    <option value="30">30 条/页</option>
+                    <option value="40">40 条/页</option>
+                    <option value="50">50 条/页</option>
+                </select>
+            </span>
+
+            <button class="page-first">首页</button>
+            <button class="page-pre">上一页</button>
+            <span class="page-show"></span>
+            <button class="page-next">下一页</button>
+            <button class="page-last">末页</button>
+            <button class="page_turn_button">跳转</button>到<input class="page_turn_input" type="number" min="1" style="width: 30px;">页
+
+            <span class="page-count"></span>
+        </div>
+    </center>
+
+    <div class="operation_buttons">
+    <button class="cloze"></button>
+    <div class="operation_buttons">
+        <button class="add_picture_button"></button>
+        <button class="delete_picture_button"></button>
+        <button class="modify_label_button"></button>
+    </div>
+    </div>
+
+    <div class="add_operation_buttons">
+    <button class="cloze"></button>
+    <div class="add_operation_buttons">
+        <button class="add_button"></button>
+        <button class="add_save_button"></button>
+        <button class="add_submit_button"></button>
+        <button class="return_button"></button>
+        <button class="reset_button"></button>
+    </div>
+    </div>
+
+    <div class="delete_operation_buttons">
+    <button class="cloze"></button>
+    <div class="delete_operation_buttons">
+        <button class="delete_button"></button>
+        <button class="delete_save_button"></button>
+        <button class="delete_submit_button"></button>
+        <button class="return_button"></button>
+        <button class="reset_button"></button>
+    </div>
+    </div>
+
+    <div class="modify_label_operation_buttons">
+    <button class="cloze"></button>
+    <div class="modify_label_operation_buttons">
+        <button class="modify_label_modify_button"></button>
+        <button class="modify_label_save_button"></button>
+        <button class="modify_label_submit_button"></button>
+        <button class="return_button"></button>
+        <button class="reset_button"></button>
+    </div>
+    </div>
+
+    <div class="reserve_space">
+    </div>
+
+    <button class="login_button" style="position:absolute;top:20px;right:80px;">登录</button>
+    <ul class="personal_info">
+        <li class="cur_user">你好,</li>
+        <li><button class="backtomenu_button">主页</button></li>
+        <li><button class="logout_button">登出</button></li>
+    </ul>
+</body>
+
+</html>

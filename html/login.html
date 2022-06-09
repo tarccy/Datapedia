@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <link rel="stylesheet" href="style.css" />
+    <style type="text/css">
+      body {
+        background-image: url(./images/background.jpg);
+        background-repeat: no-repeat;
+      }
+      form {
+        width: 100%;
+        height: 100%;
+        margin-top: 100px;
+        margin-bottom: 100px;
+      }
+
+      div {
+        display: inline-block;
+        padding-top: 50px;
+        padding-bottom: 55px;
+        padding-left: 1px;
+        padding-right: 1px;
+      }
+
+      h2 {
+        font-family: "微软雅黑";
+        font-size: 40px;
+        color: white;
+      }
+      p {
+        color: white;
+      }
+      #log {
+        color: rgb(255, 0, 0);
+      }
+    </style>
+
+    <script src="jquery.js"></script>
+    <script>
+      $(document).ready(function () {
+        $(".register_box").hide();
+        $(".login_button").click(function () {
+          let user_id = $(".user_id").val();
+          let password = $(".password").val();
+          if (user_id.indexOf("@") > -1) {
+            alert('用户ID不可包含"@"！');
+            return;
+          } else if (user_id.indexOf(",") > -1) {
+            alert('用户ID不可包含","！');
+            return;
+          } else if (password.indexOf("@") > -1) {
+            alert('密码不可包含"@"！');
+            return;
+          } else if (password.indexOf(",") > -1) {
+            alert('密码不可包含","！');
+            return;
+          }
+
+          let txt = "login@" + user_id + "@" + password;
+
+          let paras = [];
+          $.ajax({
+            type: "post",
+            url: "http://101.200.126.249:8088/",
+            async: false,
+            dataType: "text",
+            data: txt,
+            success: function (res) {
+              // 接收后端信息，未完成
+              paras = res.split(",");
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              debugger;
+              // 状态码
+              console.log(XMLHttpRequest.status);
+              // 状态
+              console.log(XMLHttpRequest.readyState);
+              // 错误信息
+              console.log(textStatus);
+              __hideLoading();
+
+              if (XMLHttpRequest.readyState == 0) {
+                // 对应登录超时问题，直接跳到登录页面
+                location.href = "../Login.action";
+              } else {
+                $.messager.alert(
+                  "提示",
+                  "系统内部错误，请联系管理员处理！",
+                  "info"
+                );
+              }
+            },
+          });
+          if (paras.length == 1) {
+            var url = "datapedia.html";
+            url += "?user_id=" + user_id;
+
+            localStorage.setItem("now_user", user_id); // 记录当前登录者
+
+            window.location.href = url;
+            window.event.returnValue = false;
+          } else if (paras[1] == "0") {
+            alert("不存在该用户！");
+          } else if (paras[1] == "1") {
+            alert("密码错误！");
+          } else if (paras[1] == "2") {
+            alert("该用户已在其他计算机登录");
+          }
+        });
+
+        $(".login2register").click(function () {
+          $(".login_box").hide();
+          $(".register_box").show();
+        });
+
+        $(".register2login").click(function () {
+          $(".register_box").hide();
+          $(".login_box").show();
+        });
+
+        $(".register_button").click(function () {
+          let username = $(".username").val();
+          let password = $(".register_password").val();
+          let confirm_password = $(".register_confirm_password").val();
+          if (username == "") {
+            alert("用户名不可为空！");
+            return;
+          } else if (username.indexOf("@") > -1) {
+            alert('用户名不可包含"@"！');
+            return;
+          } else if (username.indexOf(",") > -1) {
+            alert('用户名不可包含","！');
+            return;
+          } else if (password == "") {
+            alert("初始密码不可为空！");
+            return;
+          } else if (password.indexOf("@") > -1) {
+            alert('密码不可包含"@"！');
+            return;
+          } else if (password.indexOf(",") > -1) {
+            alert('密码不可包含","！');
+            return;
+          } else if (password != confirm_password) {
+            alert("确认密码需要与输入的初始密码相同！");
+            return;
+          }
+
+          let txt = "register@" + username + "@" + password;
+
+          paras = [];
+          $.ajax({
+            type: "post",
+            url: "http://101.200.126.249:8088/",
+            async: false,
+            dataType: "text",
+            data: txt,
+            success: function (res) {
+              paras = res.split(",");
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              debugger;
+              // 状态码
+              console.log(XMLHttpRequest.status);
+              // 状态
+              console.log(XMLHttpRequest.readyState);
+              // 错误信息
+              console.log(textStatus);
+              __hideLoading();
+
+              if (XMLHttpRequest.readyState == 0) {
+                // 对应登录超时问题，直接跳到登录页面
+                location.href = "../Login.action";
+              } else {
+                $.messager.alert(
+                  "提示",
+                  "系统内部错误，请联系管理员处理！",
+                  "info"
+                );
+              }
+            },
+          });
+          alert(
+            "注册成功！您的用户ID是" +
+              paras[0] +
+              "，您的密码是" +
+              paras[1] +
+              "。请牢记以上登录信息。"
+          );
+        });
+
+        $(".back_button").click(function () {
+          window.history.go(-1);
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <button class="back_button">返回</button>
+    <center>
+      <div class="login_box">
+        <h2>登录</h2>
+        <p>用户ID：<input class="user_id" type="text" /></p>
+        <p>密&emsp;码：<input class="password" type="password" /></p>
+        <button class="login_button">立即登录</button>
+        <p>没有账号？<button class="login2register">请注册</button></p>
+      </div>
+    </center>
+
+    <center>
+      <div class="register_box">
+        <h2>注册</h2>
+        <p>用户名&emsp;：<input class="username" type="text" /></p>
+        <p>
+          密&emsp;码&emsp;：<input class="register_password" type="password" />
+        </p>
+        <p>
+          确认密码：<input class="register_confirm_password" type="password" />
+        </p>
+        <button class="register_button">立即注册</button>
+        <p>已有账号？<button class="register2login">请登录</button></p>
+      </div>
+    </center>
+  </body>
+</html>

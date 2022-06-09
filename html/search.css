@@ -1,0 +1,132 @@
+.search_table_head {
+    margin-left: 10%;
+    color: white;
+}
+
+button {
+    cursor: pointer;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 5 5 5 5;
+    background: url("https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fpic34.nipic.com%2F20131105%2F13924676_143905261155_2.png&refer=http%3A%2F%2Fpic34.nipic.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1653463678&t=f46dafc2539b3254963a639ef1ad49d5") no-repeat;
+    padding: 0;
+    background-size: cover;
+    background-position: center 0;
+    font-weight: 500;
+    color: white;
+    font-family: "Microsoft YaHei", "宋体", "Segoe UI", "Lucida Grande", Helvetica, Arial, sans-serif, FreeSans, Arimo;
+}
+
+#container {
+    width: 380px;
+    height: 200px;
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+form {
+    position: relative;
+    width: 300px;
+    margin: 0 auto;
+}
+
+input,
+button {
+    border: none;
+    outline: none;
+}
+
+input {
+    width: 100%;
+    height: 42px;
+    padding-left: 13px;
+    padding-right: 46px;
+}
+
+.search_button {
+    height: 62px;
+    width: 62px;
+    cursor: pointer;
+    position: absolute;
+}
+
+.search_input {
+    background: #A3D0C3;
+}
+
+.search_input input {
+    border: 2px solid #7BA7AB;
+    border-radius: 5px;
+    background: #F9F0DA;
+    color: #9E9C9C;
+}
+
+.search_input button {
+    top: 42px;
+    right: -160px;
+    background: #7BA7AB;
+    border-radius: 5px 5px 5px 5px;
+}
+
+.search_input button:before {
+    content: "\f002";
+    font-family: FontAwesome;
+    font-size: 16px;
+    color: #F9F0DA;
+}
+
+.search_table {
+    text-align: center;
+    margin: 0 auto;
+    color: black;
+    background-color: rgb(90, 215, 240);
+    width: 80%;
+}
+
+.search_table th {
+    text-align: center;
+    background-color: rgb(215, 129, 239);
+}
+
+.search_table td {
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+li {
+    list-style-type: none;
+    margin: 10px;
+}
+
+.personal_info{
+    background-color: transparent;
+    text-align: center;
+    position:absolute;
+    top:0px;
+    right:30px;
+}
+
+.cur_user:hover{
+    color: greenyellow;
+    cursor: pointer;
+}
+
+.back_button,.backtomenu_button,.login_button,.logout_button{
+    border: groove;
+    background-color: black;
+    color: white;
+    background-size:100% 100%;
+}
+
+.back_button:hover,.backtomenu_button:hover,.login_button:hover,.logout_button:hover{
+    border: groove;
+    background-color: gray;
+    color: white;
+    background-size:100% 100%;
+}
