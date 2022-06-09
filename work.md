@@ -30,14 +30,14 @@ Datapedia分工情况
     表格数据集界面（table_dataset.html）:黄哲涛、沈康宁、王煊宇（美化）           
     css编写（style.css、picstyle.css、textstyle.css、tablestyle.css）：黄哲涛、沈康宁、王煊宇                   
 
-前端测试：沈康宁
+前端测试：沈康宁            
 
-后端测试：王煊宇、黄哲涛
+后端测试：王煊宇、黄哲涛             
 
-协调对接部分：
-    Patahub:沈康宁
-    Datagit:曹修齐
+协调对接部分：               
+    Patahub:沈康宁            
+    Datagit:曹修齐           
 
-服务器部署以及相关调试:王煊宇
+服务器部署以及相关调试:王煊宇         
 
 
